@@ -64,7 +64,7 @@ class SendWrap : public ReqWrap<uv_udp_send_t> {
 SendWrap::SendWrap(Environment* env,
                    Local<Object> req_wrap_obj,
                    bool have_callback)
-    : ReqWrap(env, req_wrap_obj, AsyncWrap::PROVIDER_UDPWRAP),
+    : ReqWrap<uv_udp_send_t>(env, req_wrap_obj, AsyncWrap::PROVIDER_UDPWRAP),
       have_callback_(have_callback) {
   Wrap(req_wrap_obj, this);
 }
@@ -445,7 +445,17 @@ void UDPWrap::OnRecv(uv_udp_t* handle,
     return;
   }
 
-  char* base = static_cast<char*>(realloc(buf->base, nread));
+  char* base = NULL;
+  if (nread != 0) {
+     base = static_cast<char*>(realloc(buf->base, nread));
+    // If realloc fails, fallback to old pointer
+    // safe since we are always shrinking the buffer
+    if (base == NULL)
+        base = buf->base;
+  } else {
+    free(buf->base);
+  }
+
   argv[2] = Buffer::Use(env, base, nread);
   argv[3] = AddressToJS(env, addr);
   wrap->MakeCallback(env->onmessage_string(), ARRAY_SIZE(argv), argv);

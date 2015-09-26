@@ -2,14 +2,14 @@
 
     Stability: 5 - Locked
 
-This module is used for writing unit tests for your applications, you can
+This module is used for testing actual values against expected values, you can
 access it with `require('assert')`.
 
 ## assert.fail(actual, expected, message, operator)
 
 Throws an exception that displays the values for `actual` and `expected` separated by the provided operator.
 
-## assert(value, message), assert.ok(value[, message])
+## assert(value[, message]), assert.ok(value[, message])
 
 Tests if value is truthy, it is equivalent to `assert.equal(true, !!value, message);`
 
